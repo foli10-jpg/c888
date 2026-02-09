@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎰 777</title>
+
+<style>
+body{
+    background:#0f0f0f;
+    color:white;
+    font-family:Arial, sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0;
+}
+.game{
+    width:420px;
+    background:#181818;
+    padding:20px;
+    border-radius:15px;
+    text-align:center;
+    box-shadow:0 0 20px rgba(0,0,0,.6);
+}
+h2{margin-bottom:10px;}
+.info{
+    display:flex;
+    justify-content:space-between;
+    font-weight:bold;
+    margin-bottom:10px;
+}
+.slot-container{
+    position:relative;
+    overflow:hidden;
+    border:3px solid #fff;
+    border-radius:10px;
+    height:80px;
+    margin:20px 0;
+}
+.pointer{
+    position:absolute;
+    left:50%;
+    top:0;
+    transform:translateX(-50%);
+    width:1px;
+    height:100%;
+    background:red;
+    z-index:2;
+}
+.reel-container{display:flex;}
+.slots{display:flex;}
+.slot{
+    width:50px;
+    height:60px;
+    margin:10px 5px;
+    background:#1e90ff;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:18px;
+    font-weight:bold;
+    border-radius:10px;
+}
+button{
+    padding:10px 25px;
+    font-size:18px;
+    border:none;
+    border-radius:8px;
+    background:gold;
+    font-weight:bold;
+    cursor:pointer;
+}
+button:disabled{opacity:.6;}
+#result{
+    margin-top:15px;
+    font-size:22px;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+<div class="game">
+    <h2>🎰 777</h2>
+
+    <div class="info">
+        <div>💰 Binance: <span id="balance">5.00</span>€</div>
+        <div>🎯 Bet: 0.20€</div>
+    </div>
+
+    <div class="slot-container">
+        <div class="pointer"></div>
+        <div class="reel-container">
+            <div class="slots" id="reel1"></div>
+            <div class="slots" id="reel2"></div>
+            <div class="slots" id="reel3"></div>
+        </div>
+    </div>
+
+    <button id="spinBtn" onclick="spin()">START</button>
+    <div id="result"></div>
+</div>
+
+<script>
+// 🔹 SIMBOLET REALISTE
+const symbols = [ "❌","❌","0.50€", "❌","❌",];
+
+// 🔹 FITIM SIPAS SIMBOLIT
+const payouts = {
+   "0.50€": 0.50
+};
+
+const reels = [
+    document.getElementById("reel1"),
+    document.getElementById("reel2"),
+    document.getElementById("reel3")
+];
+
+const balanceEl = document.getElementById("balance");
+const resultEl = document.getElementById("result");
+const btn = document.getElementById("spinBtn");
+
+let balance = 5.00;
+const bet = 0.20;
+const boxes = 30;
+
+// 🔹 krijo reels
+reels.forEach(reel=>{
+    for(let i=0;i<boxes;i++){
+        const d = document.createElement("div");
+        d.className="slot";
+        d.textContent="❌";
+        reel.appendChild(d);
+    }
+});
+
+// 🔹 simbol random
+function randomSymbol(){
+    return symbols[Math.floor(Math.random()*symbols.length)];
+}
+
+function spin(){
+    if(balance < bet){
+        resultEl.textContent="❌ Nuk ke Binance";
+        return;
+    }
+
+    btn.disabled=true;
+    resultEl.textContent="";
+    balance -= bet;
+    balanceEl.textContent=balance.toFixed(2);
+
+    let spins = 0;
+    const maxSpins = 25;
+
+    const interval = setInterval(()=>{
+        spins++;
+
+        reels.forEach(reel=>{
+            [...reel.children].forEach(cell=>{
+                cell.textContent = randomSymbol();
+            });
+        });
+
+        if(spins >= maxSpins){
+            clearInterval(interval);
+
+            // 🎯 10% fitim
+            let finalSymbol = "";
+            if(Math.random() <= 0.10){
+                finalSymbol = Math.random() < 0.1 ? "" : "";
+            }
+
+            // vendos rezultatin në qendër
+            reels.forEach(reel=>{
+                reel.children[1].textContent = finalSymbol;
+            });
+
+            if(payouts[finalSymbol]){
+                balance += payouts[finalSymbol];
+                resultEl.textContent = `🎉 ${payouts[finalSymbol].toFixed(2)}€`;
+            }else{
+                resultEl.textContent = "";
+            }
+
+            balanceEl.textContent=balance.toFixed(2);
+            btn.disabled=false;
+        }
+    },100);
+}
+</script>
+
+</body>
+</html>
